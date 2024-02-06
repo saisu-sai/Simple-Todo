@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-Do List</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #1e1e1e;
+        color: #fff;
+        margin: 0;
+        padding: 0;
+    }
+    #todo-list {
+        margin: 20px auto;
+        max-width: 400px;
+    }
+    input[type="text"] {
+        width: 70%;
+        padding: 8px;
+        border: 1px solid #444;
+        border-radius: 5px;
+        background-color: #333;
+        color: #fff;
+    }
+    button {
+        padding: 8px 15px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #45a049;
+    }
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    li {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+    input[type="checkbox"] {
+        margin-right: 10px;
+    }
+    span {
+        flex-grow: 1;
+    }
+    button.delete {
+        background-color: #f44336;
+    }
+    button.delete:hover {
+        background-color: #cc0000;
+    }
+</style>
+</head>
+<body>
+
+<div id="todo-list">
+    <h2>To-Do List</h2>
+    <input type="text" id="todo-input" placeholder="Add new item">
+    <button onclick="addItem()">Add</button>
+    <ul id="todo-items"></ul>
+</div>
+
+<script>
+    // Function to retrieve data from local storage
+    function getDataFromLocalStorage() {
+        return JSON.parse(localStorage.getItem("todoItems")) || [];
+    }
+
+    // Function to save data to local storage
+    function saveDataToLocalStorage(data) {
+        localStorage.setItem("todoItems", JSON.stringify(data));
+    }
+
+    // Function to add new item to the list
+    function addItem() {
+        var input = document.getElementById("todo-input");
+        var itemText = input.value.trim();
+        if (itemText !== "") {
+            var listItem = {
+                text: itemText,
+                completed: false
+            };
+
+            var items = getDataFromLocalStorage();
+            items.push(listItem);
+            saveDataToLocalStorage(items);
+
+            renderTodoList();
+            input.value = "";
+        }
+    }
+
+    // Function to render the todo list
+    function renderTodoList() {
+        var items = getDataFromLocalStorage();
+        var list = document.getElementById("todo-items");
+        list.innerHTML = '';
+
+        items.forEach(function(item, index) {
+            var listItem = document.createElement("li");
+            var checkBox = document.createElement("input");
+            checkBox.type = "checkbox";
+            checkBox.checked = item.completed;
+            checkBox.addEventListener("change", function() {
+                updateItemStatus(index, this.checked);
+            });
+
+            var span = document.createElement("span");
+            span.textContent = item.text;
+            if (item.completed) {
+                span.style.textDecoration = "line-through";
+            }
+
+            var deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.className = "delete";
+            deleteButton.addEventListener("click", function() {
+                deleteItem(index);
+            });
+
+            listItem.appendChild(checkBox);
+            listItem.appendChild(span);
+            listItem.appendChild(deleteButton);
+
+            list.appendChild(listItem);
+        });
+    }
+
+    // Function to update item status (completed or not)
+    function updateItemStatus(index, completed) {
+        var items = getDataFromLocalStorage();
+        items[index].completed = completed;
+        saveDataToLocalStorage(items);
+        renderTodoList();
+    }
+
+    // Function to delete item from the list
+    function deleteItem(index) {
+        var items = getDataFromLocalStorage();
+        items.splice(index, 1);
+        saveDataToLocalStorage(items);
+        renderTodoList();
+    }
+
+    // Render initial todo list when the page loads
+    window.onload = function() {
+        renderTodoList();
+    };
+</script>
+
+</body>
+</html>
+
